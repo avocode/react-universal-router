@@ -1,0 +1,7 @@
+.coffeelint
+example
+test
+*.coffee
+*.sh
+coverage
+dist

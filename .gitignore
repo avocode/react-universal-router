@@ -1,0 +1,11 @@
+# OS garbage
+.DS_Store
+Thumbs.db
+
+# built sources
+dist/
+
+# npm stuff
+node_modules/
+npm-debug.log
+coverage/
