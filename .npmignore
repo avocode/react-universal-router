@@ -4,4 +4,3 @@ test
 *.coffee
 *.sh
 coverage
-dist

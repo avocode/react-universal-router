@@ -65,17 +65,17 @@ class Router
     return _.findKey @_config, (item) -> item is name
 
   _matchTarget: (namespace) ->
-    route = []
+    route = null
     for item in @_targets
       prefix = item.namespace or ''
       _descriptor = _.partial(@_namespaceDescriptor, _, _, prefix, namespace)
       if _.some item.states, _descriptor
-        route.push
+        route =
           route:
             name: _.findKey item.states, _descriptor
           props: _.findLast item.states, _descriptor
           component: item.component
-    return _.first(route)
+    return route
 
   _namespaceDescriptor: (item, key, prefix, namespace) ->
     return namespace is (prefix + key)
@@ -88,10 +88,10 @@ class Router
   addTarget: (target, namespace) ->
     invariant(target, 'addTarget: target must be provided.')
     if namespace
-      targetObj = _.first(target)
+      targetObj = target
       targetObj.namespace = namespace + @_delimiter
 
-    @_targets = @_targets.concat(target)
+    @_targets.push(target)
 
   addListener: (callback) ->
     invariant(callback, 'addListener: callback must be provided.')

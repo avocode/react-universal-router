@@ -6,17 +6,17 @@ Router = require '../lib/'
 Test = React.createClass
   render: ->
     div null,
-      'Test'
+      '1. Hey'
 
 Test2 = React.createClass
   render: ->
     div null,
-      'Test 2'
+      '2. Hello'
 
 Test3 = React.createClass
   render: ->
     div null,
-      'Test 3'
+      '3. Aloha'
 
 App = React.createClass
   getInitialState: ->
@@ -30,7 +30,7 @@ App = React.createClass
       @state.activeComponent
 
 
-routes = [
+routes =
   component: Test
   states: {
     'list': {
@@ -40,21 +40,19 @@ routes = [
       detail: 44
     }
   }
-]
 
-routes2 = [
+routes2 =
   component: Test2
   states: {
     'index': {}
   }
-]
 
-routes3 = [
+routes3 = {
   component: Test3
   states: {
     'notFoundComponent': {}
   }
-]
+}
 
 routeMap =
   '/projects': 'project-manager/list'
