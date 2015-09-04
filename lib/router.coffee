@@ -8,8 +8,6 @@ React = require 'react'
 class Router
 
   constructor: (obj = {}) ->
-    invariant _.isEmpty(obj),
-      'Router constructor: you have to provide memoryType.'
     @_activeComponent = null
     @_targets = []
     @_delimiter = obj.delimiter or '/'
