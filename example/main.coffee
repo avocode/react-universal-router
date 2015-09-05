@@ -63,12 +63,13 @@ routeMap =
   '/': 'index'
 
 
-router = new Router()
+router = new Router(history: 'push')
 router.addRoutes(routeMap)
 router.addTarget(routes, 'project-manager')
 router.addTarget(routes2)
 router.addTarget(routes3)
 
+window.router = router
 
 mountElement = document.getElementById('app')
 

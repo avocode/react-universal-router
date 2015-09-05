@@ -9,19 +9,23 @@ class Router
 
   constructor: (obj = {}) ->
     @_activeComponent = null
+    @_config = null
     @_targets = []
     @_delimiter = obj.delimiter or '/'
     @_router = new Ruta3()
+    @_slash = obj.slash or null
 
-    @_setupHistory(obj.memoryType or 'hash')
+    @_setupHistory(obj.history or 'hash', obj.defaultRoute or '/')
 
-  _setupHistory: (memoryType) ->
-    switch memoryType
+  _setupHistory: (historyType, defaultRoute) ->
+    switch historyType
       when 'hash' then historyFactory = history.createHashHistory
       when 'push' then historyFactory = history.createHistory
-      when 'memory' then historyFactory = histroy.createMemoryHistory
+      when 'memory' then historyFactory = history.createMemoryHistory
+      else invariant(false, "There is no history type '#{history}'.")
 
     @_history = history.useQueries(historyFactory)()
+    @_history.replaceState({}, defaultRoute) if defaultRoute != '/'
 
   _handleRoute: (route) ->
     unless route
@@ -34,7 +38,7 @@ class Router
       component = matchTarget.component
       routeProps =
         route: matchTarget.route
-        router: @_routerProps()
+        router: @getRouterProps()
       props = _.assign({}, routeProps, matchTarget.props or {})
       return React.createElement(component, props)
 
@@ -45,22 +49,6 @@ class Router
       path = pathToRegexp.compile(redirectTo)
       @_history.replaceState(null, path(route.params))
       return null
-
-  _routerProps: ->
-    {go, goBack, goForward, pushState, replaceState} = @_history
-
-    go: go
-    goBack: goBack
-    goForward: goForward
-    pushState: pushState
-    replaceState: replaceState
-    getCurrentComponent: @getCurrentComponent
-    transitionTo: (name, state = {}, params = {}) =>
-      pathname = @_getRouteByName(name)
-      pushState(state, pathname, params)
-
-  _getRouteByName: (name) ->
-    return _.findKey @_config, (item) -> item is name
 
   _matchTarget: (namespace) ->
     route = null
@@ -78,6 +66,20 @@ class Router
   _namespaceDescriptor: (item, key, prefix, namespace) ->
     return namespace is (prefix + key)
 
+  _slashResolver: (location) ->
+    resolved = null
+    if location.pathname.length > 1
+      if @_slash is 'enforce'
+        unless _.endsWith(location.pathname, '/')
+          location.pathname = "#{location.pathname}/"
+          resolved = true
+      if @_slash is 'omit'
+        if _.endsWith(location.pathname, '/')
+          location.pathname = location.pathname.replace(/\/+$/, '')
+          resolved = true
+    @_history.replaceState(null, location.pathname) if resolved
+    return resolved
+
   addRoutes: (config) ->
     invariant(config, 'addRoutes: config must be provided.')
     @_config = config
@@ -93,12 +95,32 @@ class Router
 
   addListener: (callback) ->
     invariant(callback, 'addListener: callback must be provided.')
+    invariant(@_config, 'addListener: call `addRoutes` method first.')
+    invariant(@_targets.length, 'addListener: call `addTarget` method first.')
     @_history.listen (location) =>
+      return if @_slashResolver(location)
       @_activeComponent = @_handleRoute(@_router.match(location.pathname))
       callback(@_activeComponent) if @_activeComponent
 
   getCurrentComponent: ->
     return @_activeComponent
+
+  getRouteByName: (name) ->
+    invariant(@_config, 'getRouteByName: call `addRoutes` method first.')
+    return _.findKey @_config, (item) -> item is name
+
+  getRouterProps: ->
+    {go, goBack, goForward, pushState, replaceState} = @_history
+
+    go: go
+    goBack: goBack
+    goForward: goForward
+    pushState: pushState
+    replaceState: replaceState
+    getCurrentComponent: @getCurrentComponent
+    transitionTo: (name, state = {}, params = {}) =>
+      pathname = @getRouteByName(name)
+      pushState(state, pathname, params)
 
 
 module.exports = Router
