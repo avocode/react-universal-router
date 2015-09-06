@@ -28,6 +28,7 @@ class Router
 
     @_history = history.useQueries(historyFactory)()
     @_history.replaceState({}, defaultRoute) if defaultRoute != '/'
+    @_avoidTransitionWhenSameRoute()
 
   _handleRoute: (route) ->
     unless route
@@ -92,6 +93,13 @@ class Router
     @_location.state = location.state
     @_location.search = location.search
 
+  _avoidTransitionWhenSameRoute: ->
+    @_history.registerTransitionHook (location) =>
+      isSameLocation = _.isEqual(location.pathname, @_location.pathname) and
+        _.isEqual(location.search, @_location.search) and
+        _.isEqual(location.state, @_location.state)
+      return false if isSameLocation
+
   addRoutes: (config) ->
     invariant(config, 'addRoutes: config must be provided.')
     @_config = config
@@ -133,7 +141,8 @@ class Router
 
   getRouteByName: (name) ->
     invariant(@_config, 'getRouteByName: call `addRoutes` method first.')
-    return _.findKey @_config, (item) -> item is name
+    result = _.findKey @_config, (item) -> item is name
+    return result or null
 
   getRouterProps: ->
     location: @_location
@@ -146,9 +155,11 @@ class Router
     getCurrentComponent: => @getCurrentComponent()
     registerTransitionHook: (callback) => @registerTransitionHook(callback)
     unregisterTransitionHook: (callback) => @unregisterTransitionHook(callback)
-    transitionTo: (name, state = {}, query = {}) =>
-      pathname = @getRouteByName(name)
-      @_history.pushState(state, pathname, query)
+    transitionTo: (name, params = {}, state = {}, query = {}) =>
+      route = @getRouteByName(name)
+      invariant(route, 'transitionTo: wrong name argument provided.')
+      path = pathToRegexp.compile(route)
+      @_history.pushState(state, path(params), query)
 
 
 module.exports = Router

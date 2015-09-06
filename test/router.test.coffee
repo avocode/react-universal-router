@@ -158,7 +158,7 @@ describe 'Router class: ', ->
 
 
   it 'should enforce or omit slash at the the of the url', ->
-    router = new Router(slash: 'enforce', history: 'memory', delimiter: '@')
+    router = new Router(slash: 'enforce', history: 'memory')
     router.addRoutes(routes)
     router.addTarget(targetA, 'project-manager')
     router.addTarget(targetB)
@@ -168,7 +168,7 @@ describe 'Router class: ', ->
       expect(_.endsWith(location.pathname, '/')).to.be(true)
 
     props.pushState({}, '/haha', {testing: 123})
-    props.transitionTo('project-manager@detail')
+    props.transitionTo('project-manager/detail', id: 12)
 
     router2 = new Router(slash: 'omit', history: 'memory')
     router2.addRoutes(routes)
@@ -182,7 +182,7 @@ describe 'Router class: ', ->
         expect(_.endsWith(location.pathname, '/')).to.be(false)
 
     props.pushState({}, '/haha////', {testing: 123})
-    props.transitionTo('project-manager@detail')
+    props.transitionTo('project-manager/detail', id: 99)
     props.replaceState({}, '/qazwsx/?j=123')
 
   it 'should redirect to provided route', ->
@@ -253,3 +253,19 @@ describe 'Router class: ', ->
     router = new Router(history: 'memory')
     expect(router.registerTransitionHook).to.throwError()
     expect(router.unregisterTransitionHook).to.throwError()
+
+  it 'should avoid transition to the same view twice', ->
+    router = new Router(history: 'memory')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.addTarget(targetB)
+    count = 0
+
+    router.listen ->
+      count += 1
+
+    router.getRouterProps().transitionTo('index')
+    router.getRouterProps().transitionTo('index')
+    router.getRouterProps().transitionTo('index')
+    router.getRouterProps().transitionTo('index')
+    expect(count).to.be(2)
