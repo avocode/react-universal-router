@@ -23,7 +23,7 @@ App = React.createClass
     activeComponent: @props.router.getCurrentComponent()
 
   componentDidMount: ->
-    @props.router.addListener =>
+    @props.router.listen =>
       @setState(activeComponent: @props.router.getCurrentComponent())
   render: ->
     div null,
