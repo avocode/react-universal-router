@@ -4,6 +4,17 @@ Router = require '../lib/'
 {div} = React.DOM
 
 Test = React.createClass
+
+  _transition: null
+
+  componentDidMount: ->
+    @_transition = (location) ->
+      return 'Are you really wanna leave?'
+    @props.router.registerTransitionHook @_transition
+
+  componentWillUnmount: ->
+    @props.router.unregisterTransitionHook @_transition
+
   render: ->
     div null,
       '1. Hey'

@@ -115,6 +115,14 @@ class Router
       @_activeComponent = @_handleRoute(@_router.match(location.pathname))
       callback(@_activeComponent) if @_activeComponent
 
+  registerTransitionHook: (callback) ->
+    invariant(callback, 'registerTransitionHook: callback must be specified.')
+    @_history.registerTransitionHook(callback) if _.isFunction(callback)
+
+  unregisterTransitionHook: (callback) ->
+    invariant(callback, 'unregisterTransitionHook: callback must be specified.')
+    @_history.unregisterTransitionHook(callback) if _.isFunction(callback)
+
   getCurrentComponent: ->
     return @_activeComponent
 
@@ -136,6 +144,8 @@ class Router
     replaceState: @_history.replaceState
     getCurrentRouteProps: => @getCurrentRouteProps()
     getCurrentComponent: => @getCurrentComponent()
+    registerTransitionHook: (callback) => @registerTransitionHook(callback)
+    unregisterTransitionHook: (callback) => @unregisterTransitionHook(callback)
     transitionTo: (name, state = {}, query = {}) =>
       pathname = @getRouteByName(name)
       @_history.pushState(state, pathname, query)

@@ -226,3 +226,30 @@ describe 'Router class: ', ->
 
     result = '<div>componentA...</div>'
     router.getRouterProps().transitionTo('project-manager/list')
+
+  it 'should register/unregister transition hook', ->
+    router = new Router(history: 'memory')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.addTarget(targetB)
+
+    router.listen -> null
+
+    test = (_router) =>
+      fn = (location) ->
+        expect(location.pathname).to.be.a('string')
+      _router.registerTransitionHook fn
+      props = router.getRouterProps()
+      props.pushState({}, '/projects')
+      props.goBack()
+      props.goForward()
+      _router.unregisterTransitionHook fn
+
+    test(router.getRouterProps())
+    test(router)
+
+
+  it 'should throw an error when not providing callback', ->
+    router = new Router(history: 'memory')
+    expect(router.registerTransitionHook).to.throwError()
+    expect(router.unregisterTransitionHook).to.throwError()
