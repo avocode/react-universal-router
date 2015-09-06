@@ -200,9 +200,24 @@ describe 'Router class: ', ->
 
     router.listen ->
       component = router.getCurrentComponent()
+      shallowRenderer = ReactTestUtils.createRenderer()
       shallowRenderer.render(component)
       output = shallowRenderer.getRenderOutput()
       expect(output.props.children).to.be(text)
 
     text = 'componentA...'
+    router.getRouterProps().transitionTo('project-manager/list')
+
+  it 'should render component to string', ->
+    router = new Router(history: 'memory')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.addTarget(targetB)
+
+    result = '<div>componentB...</div>'
+
+    router.listen (component) ->
+      expect(React.renderToStaticMarkup(component)).to.be(result)
+
+    result = '<div>componentA...</div>'
     router.getRouterProps().transitionTo('project-manager/list')
