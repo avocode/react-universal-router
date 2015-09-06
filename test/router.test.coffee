@@ -141,15 +141,20 @@ describe 'Router class: ', ->
 
     router.listen -> null
 
+    props = router.getCurrentRouteProps()
+    test = (props) ->
+      expect(props.route).to.be.an('object')
+      expect(props.router).to.be.an('object')
+      expect(props.list).to.be(22)
+      expect(props.route.originalName).to.be('list')
+      expect(props.route.name).to.be('project-manager/list')
+      expect(props.route.pathname).to.be('/projects')
+      expect(props.route.query.test).to.be('123')
+      expect(props.router.getCurrentComponent()).to.be.an('object')
+
+    test(props)
     props = router.getRouterProps().getCurrentRouteProps()
-    expect(props.route).to.be.an('object')
-    expect(props.router).to.be.an('object')
-    expect(props.list).to.be(22)
-    expect(props.route.originalName).to.be('list')
-    expect(props.route.name).to.be('project-manager/list')
-    expect(props.route.pathname).to.be('/projects')
-    expect(props.route.query.test).to.be('123')
-    expect(props.router.getCurrentComponent()).to.be.an('object')
+    test(props)
 
 
   it 'should enforce or omit slash at the the of the url', ->

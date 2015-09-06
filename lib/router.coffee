@@ -118,6 +118,11 @@ class Router
   getCurrentComponent: ->
     return @_activeComponent
 
+  getCurrentRouteProps: ->
+    invariant @_routeProps,
+      'No props set yet. You have to call `listen` methhod first.'
+    return @_routeProps
+
   getRouteByName: (name) ->
     invariant(@_config, 'getRouteByName: call `addRoutes` method first.')
     return _.findKey @_config, (item) -> item is name
@@ -129,10 +134,7 @@ class Router
     goForward: @_history.goForward
     pushState: @_history.pushState
     replaceState: @_history.replaceState
-    getCurrentRouteProps: =>
-      invariant @_routeProps,
-        'No props set yet. You have to call `listen` methhod first.'
-      return @_routeProps
+    getCurrentRouteProps: => @getCurrentRouteProps()
     getCurrentComponent: => @getCurrentComponent()
     transitionTo: (name, state = {}, query = {}) =>
       pathname = @getRouteByName(name)
