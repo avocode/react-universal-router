@@ -63,7 +63,7 @@ routeMap =
   '/': 'index'
 
 
-router = new Router(history: 'push')
+router = new Router(history: 'hash')
 router.addRoutes(routeMap)
 router.addTarget(routes, 'project-manager')
 router.addTarget(routes2)
@@ -75,7 +75,7 @@ mountElement = document.getElementById('app')
 
 # You can use it like this
 #
-# router.addListener (component) ->
+# router.listen (component) ->
 #   React.render(component, mountElement)
 #
 # or

@@ -11,6 +11,8 @@ class Router
     @_activeComponent = null
     @_config = null
     @_targets = []
+    @_location = {}
+    @_routeProps = null
     @_delimiter = obj.delimiter or '/'
     @_router = new Ruta3()
     @_slash = obj.slash or null
@@ -36,10 +38,11 @@ class Router
       invariant matchTarget,
         'No route matched: You probably missed to specify a React component.'
       component = matchTarget.component
-      routeProps =
-        route: matchTarget.route
+      componentProps =
+        route: _.assign(matchTarget.route, @_location)
         router: @getRouterProps()
-      props = _.assign({}, routeProps, matchTarget.props or {})
+      props = _.assign({}, componentProps, matchTarget.props or {})
+      @_routeProps = props
       return React.createElement(component, props)
 
     if _.isPlainObject(route.action)
@@ -56,12 +59,15 @@ class Router
       prefix = item.namespace or ''
       _descriptor = _.partial(@_namespaceDescriptor, _, _, prefix, namespace)
       if _.some item.states, _descriptor
-        route =
+        name = _.findKey(item.states, _descriptor)
+        result =
           route:
-            name: _.findKey item.states, _descriptor
+            name: prefix + name
+            originalName: name
           props: _.findLast item.states, _descriptor
           component: item.component
-    return route
+
+    return result
 
   _namespaceDescriptor: (item, key, prefix, namespace) ->
     return namespace is (prefix + key)
@@ -80,6 +86,12 @@ class Router
     @_history.replaceState(null, location.pathname) if resolved
     return resolved
 
+  _updateLocationObj: (location) ->
+    @_location.pathname = location.pathname
+    @_location.query = location.query
+    @_location.state = location.state
+    @_location.search = location.search
+
   addRoutes: (config) ->
     invariant(config, 'addRoutes: config must be provided.')
     @_config = config
@@ -93,11 +105,12 @@ class Router
 
     @_targets.push(target)
 
-  addListener: (callback) ->
-    invariant(callback, 'addListener: callback must be provided.')
-    invariant(@_config, 'addListener: call `addRoutes` method first.')
-    invariant(@_targets.length, 'addListener: call `addTarget` method first.')
+  listen: (callback) ->
+    invariant(callback, 'listen: callback must be provided.')
+    invariant(@_config, 'listen: call `addRoutes` method first.')
+    invariant(@_targets.length, 'listen: call `addTarget` method first.')
     @_history.listen (location) =>
+      @_updateLocationObj(location)
       return if @_slashResolver(location)
       @_activeComponent = @_handleRoute(@_router.match(location.pathname))
       callback(@_activeComponent) if @_activeComponent
@@ -110,17 +123,20 @@ class Router
     return _.findKey @_config, (item) -> item is name
 
   getRouterProps: ->
-    {go, goBack, goForward, pushState, replaceState} = @_history
-
-    go: go
-    goBack: goBack
-    goForward: goForward
-    pushState: pushState
-    replaceState: replaceState
-    getCurrentComponent: @getCurrentComponent
-    transitionTo: (name, state = {}, params = {}) =>
+    location: @_location
+    go: @_history.go
+    goBack: @_history.goBack
+    goForward: @_history.goForward
+    pushState: @_history.pushState
+    replaceState: @_history.replaceState
+    getCurrentRouteProps: =>
+      invariant @_routeProps,
+        'No props set yet. You have to call `listen` methhod first.'
+      return @_routeProps
+    getCurrentComponent: => @getCurrentComponent()
+    transitionTo: (name, state = {}, query = {}) =>
       pathname = @getRouteByName(name)
-      pushState(state, pathname, params)
+      @_history.pushState(state, pathname, query)
 
 
 module.exports = Router

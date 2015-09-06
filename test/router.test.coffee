@@ -1,5 +1,5 @@
 routes = require './fixtures/routes'
-target = require './fixtures/target'
+{targetA, targetB} = require './fixtures/target'
 
 describe 'Router class: ', ->
   Router = null
@@ -22,6 +22,19 @@ describe 'Router class: ', ->
   it 'should throw an error when user provide non existing history type', ->
     fn = -> new Router(history: 'nonsense')
     expect(fn).to.throwError()
+
+  it 'should return defaultRoute', ->
+    router = new Router(history: 'memory', defaultRoute: '/projects')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.listen ->
+      expect(router.getRouterProps().location.pathname).to.be('/projects')
+
+    router = new Router(history: 'memory')
+    router.addRoutes(routes)
+    router.addTarget(targetB)
+    router.listen ->
+      expect(router.getRouterProps().location.pathname).to.be('/')
 
   it 'should throw an error when calling `addRoutes` method without arg', ->
     router = new Router()
@@ -46,7 +59,7 @@ describe 'Router class: ', ->
 
   it 'should not throw an error when user provides args to `addTarget` method', ->
     router = new Router()
-    expect(router.addTarget(target, 'testing')).to.be.ok()
+    expect(router.addTarget(targetA, 'testing')).to.be.ok()
 
   it 'should return props', ->
     router = new Router()
@@ -57,6 +70,7 @@ describe 'Router class: ', ->
     expect(props.goForward).to.be.a('function')
     expect(props.pushState).to.be.a('function')
     expect(props.replaceState).to.be.a('function')
+    expect(props.getCurrentRouteProps).to.be.a('function')
     expect(props.getCurrentComponent).to.be.a('function')
     expect(props.transitionTo).to.be.a('function')
 
@@ -67,22 +81,128 @@ describe 'Router class: ', ->
   it 'should return component', ->
     router = new Router(history: 'memory', defaultRoute: '/projects')
     router.addRoutes(routes)
-    router.addTarget(target, 'project-manager')
-    router.addListener ->
+    router.addTarget(targetA, 'project-manager')
+    router.listen (component) ->
       expect(router.getCurrentComponent()).to.be.an('object')
+      expect(component).to.be.an('object')
+      expect(_.isEqual(router.getCurrentComponent(), component)).to.be(true)
 
-  it 'should throw an error when not call `addRoutes` before `addListener`', ->
+
+  it 'should throw an error when not calling `addRoutes` before `listen`', ->
     router = new Router(history: 'memory')
-    fn = -> router.addListener -> null
+    fn = -> router.listen -> null
     expect(fn).to.throwError()
 
-  it 'should call `addListener` method', ->
+  it 'should call `listen` method', ->
     router = new Router(history: 'memory', defaultRoute: '/projects')
     router.addRoutes(routes)
-    router.addTarget(target, 'project-manager')
+    router.addTarget(targetA, 'project-manager')
     callback = sinon.spy()
-    router.addListener(callback)
+    router.listen(callback)
     expect(callback.called).to.be(true)
 
-  it 'fkodspfdsfsd', ->
-    router = new Router(slash: 'enforce', history: 'memory')
+  it 'should throw an error when no route matches', ->
+    router = new Router(history: 'memory')
+    router.addRoutes(routes)
+    router.addTarget(targetA)
+    fn = -> router.listen -> null
+    expect(fn).to.throwError()
+
+  it 'should match url', ->
+    router = new Router(history: 'memory', defaultRoute: '/projects')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.addTarget(targetB)
+    matchRoute = '/projects'
+    props = router.getRouterProps()
+    router.listen ->
+      expect(props.location.pathname).to.be(matchRoute)
+
+    matchRoute = '/'
+    props.pushState({}, '/')
+
+    matchRoute = '/projects'
+    props.transitionTo('project-manager/list')
+
+    matchRoute = '/qwerty'
+    props.replaceState({}, '/qwerty')
+
+    matchRoute = '/'
+    props.goBack()
+
+    matchRoute = '/qwerty'
+    props.goForward()
+
+  it 'should get component props', ->
+    router = new Router(history: 'memory', defaultRoute: '/projects?test=123')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.addTarget(targetB)
+
+    router.listen -> null
+
+    props = router.getRouterProps().getCurrentRouteProps()
+    expect(props.route).to.be.an('object')
+    expect(props.router).to.be.an('object')
+    expect(props.list).to.be(22)
+    expect(props.route.originalName).to.be('list')
+    expect(props.route.name).to.be('project-manager/list')
+    expect(props.route.pathname).to.be('/projects')
+    expect(props.route.query.test).to.be('123')
+    expect(props.router.getCurrentComponent()).to.be.an('object')
+
+
+  it 'should enforce or omit slash at the the of the url', ->
+    router = new Router(slash: 'enforce', history: 'memory', delimiter: '@')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.addTarget(targetB)
+    props = router.getRouterProps()
+    location = props.location
+    router.listen ->
+      expect(_.endsWith(location.pathname, '/')).to.be(true)
+
+    props.pushState({}, '/haha', {testing: 123})
+    props.transitionTo('project-manager@detail')
+
+    router2 = new Router(slash: 'omit', history: 'memory')
+    router2.addRoutes(routes)
+    router2.addTarget(targetA, 'project-manager')
+    router2.addTarget(targetB)
+
+    props = router2.getRouterProps()
+    location = props.location
+    router2.listen ->
+      if location.pathname.length > 1
+        expect(_.endsWith(location.pathname, '/')).to.be(false)
+
+    props.pushState({}, '/haha////', {testing: 123})
+    props.transitionTo('project-manager@detail')
+    props.replaceState({}, '/qazwsx/?j=123')
+
+  it 'should redirect to provided route', ->
+    router = new Router(history: 'memory', defaultRoute: '/project/13')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.addTarget(targetB)
+    location = router.getRouterProps().location
+    router.listen ->
+      expect(location.pathname).to.be('/projects/13')
+
+  it 'should render corrent React component', ->
+    router = new Router(history: 'memory')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.addTarget(targetB)
+    shallowRenderer = ReactTestUtils.createRenderer()
+
+    text = 'componentB...'
+
+    router.listen ->
+      component = router.getCurrentComponent()
+      shallowRenderer.render(component)
+      output = shallowRenderer.getRenderOutput()
+      expect(output.props.children).to.be(text)
+
+    text = 'componentA...'
+    router.getRouterProps().transitionTo('project-manager/list')

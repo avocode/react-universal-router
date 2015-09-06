@@ -1,6 +1,17 @@
 React = require 'react'
 
-module.exports = React.createClass
-  displayName: 'Test'
+componentA = React.createClass
+  displayName: 'componentA'
   render: ->
-    React.DOM.div null, 'Testing...'
+    React.DOM.div null, 'componentA...'
+
+componentB = React.createClass
+  displayName: 'componentB'
+  render: ->
+    React.DOM.div null, 'componentB...'
+
+
+module.exports = {
+  componentA
+  componentB
+}
