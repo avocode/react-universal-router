@@ -1,6 +1,6 @@
 {
   "name": "react-universal-router",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Universal router for React",
   "main": "index.js",
   "scripts": {
