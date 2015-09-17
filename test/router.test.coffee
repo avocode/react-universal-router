@@ -269,3 +269,14 @@ describe 'Router class: ', ->
     router.getRouterProps().transitionTo('index')
     router.getRouterProps().transitionTo('index')
     expect(count).to.be(2)
+
+  it 'should return null when no route is matched', ->
+    router = new Router(history: 'memory', defaultRoute: '/bla')
+    _routes = _.assign({}, routes)
+    delete _routes['404']
+    router.addRoutes(_routes)
+    router.addTarget(targetA, 'project-manager')
+    router.addTarget(targetB)
+
+    router.listen ->
+      expect(router.getCurrentComponent()).to.be(null)

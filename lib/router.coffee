@@ -34,6 +34,8 @@ class Router
     unless route
       route = @_router.match('404')
 
+    return null unless route
+
     if _.isString(route.action)
       matchTarget = @_matchTarget(route.action)
       invariant matchTarget,
