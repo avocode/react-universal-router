@@ -2,7 +2,7 @@
   "name": "react-universal-router",
   "version": "0.1.5",
   "description": "Universal router for React",
-  "main": "dist/main.js",
+  "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --hot --progress --colors --port 3000",
     "test": "./node_modules/.bin/istanbul cover test/config/index.js -x 'test/**'",
