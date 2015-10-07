@@ -37,7 +37,7 @@ class Router
     return null unless route
 
     if _.isString(route.action)
-      matchTarget = @_matchTarget(route.action)
+      matchTarget = @_matchTarget(route)
       invariant matchTarget,
         'No route matched: You probably missed to specify a React component.'
       component = matchTarget.component
@@ -56,8 +56,8 @@ class Router
       @_history.replaceState(null, path(route.params))
       return null
 
-  _matchTarget: (namespace) ->
-    route = null
+  _matchTarget: (route) ->
+    namespace = route.action
     for item in @_targets
       prefix = item.namespace or ''
       _descriptor = _.partial(@_namespaceDescriptor, _, _, prefix, namespace)
@@ -67,6 +67,7 @@ class Router
           route:
             name: prefix + name
             originalName: name
+            params: route.params
           props: _.findLast item.states, _descriptor
           component: item.component
 
