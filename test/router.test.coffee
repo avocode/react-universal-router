@@ -168,7 +168,9 @@ describe 'Router class: ', ->
       expect(_.endsWith(location.pathname, '/')).to.be(true)
 
     props.pushState({}, '/haha', {testing: 123})
-    props.transitionTo('project-manager/detail', id: 12)
+    props.transitionTo 'project-manager/detail',
+     params:
+       id: 12
 
     router2 = new Router(slash: 'omit', history: 'memory')
     router2.addRoutes(routes)
@@ -182,7 +184,9 @@ describe 'Router class: ', ->
         expect(_.endsWith(location.pathname, '/')).to.be(false)
 
     props.pushState({}, '/haha////', {testing: 123})
-    props.transitionTo('project-manager/detail', id: 99)
+    props.transitionTo 'project-manager/detail',
+      params:
+        id: 99
     props.replaceState({}, '/qazwsx/?j=123')
 
   it 'should redirect to provided route', ->

@@ -157,11 +157,19 @@ class Router
     getCurrentComponent: => @getCurrentComponent()
     registerTransitionHook: (callback) => @registerTransitionHook(callback)
     unregisterTransitionHook: (callback) => @unregisterTransitionHook(callback)
-    transitionTo: (name, params = {}, state = {}, query = {}) =>
+    transitionTo: (name, options) =>
+      defaults =
+        params: {}
+        state: {}
+        query: {}
+        methodType: 'pushState'
+
+      obj = _.assign {}, defaults, options
+      {params, state, query, methodType} = obj
       route = @getRouteByName(name)
       invariant(route, 'transitionTo: wrong name argument provided.')
       path = pathToRegexp.compile(route)
-      @_history.pushState(state, path(params), query)
+      @_history[methodType](state, path(params), query)
 
 
 module.exports = Router

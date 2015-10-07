@@ -12,6 +12,9 @@
       "right": 1
     }
   },
+  "max_line_length": {
+    "level": "warn"
+  },
   "eol_last": {
     "level": "error"
   },
