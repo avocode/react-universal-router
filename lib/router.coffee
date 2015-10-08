@@ -16,10 +16,15 @@ class Router
     @_delimiter = obj.delimiter or '/'
     @_router = new Ruta3()
     @_slash = obj.slash or null
+    avoidTransitionSameRoute = true
+    if obj.avoidTransitionSameRoute is false
+      avoidTransitionSameRoute = false
 
-    @_setupHistory(obj.history or 'hash', obj.defaultRoute or '/')
+    @_setupHistory obj.history or 'hash',
+      obj.defaultRoute or '/',
+      avoidTransitionSameRoute
 
-  _setupHistory: (historyType, defaultRoute) ->
+  _setupHistory: (historyType, defaultRoute, avoidTransitionSameRoute) ->
     switch historyType
       when 'hash' then historyFactory = history.createHashHistory
       when 'push' then historyFactory = history.createHistory
@@ -28,7 +33,7 @@ class Router
 
     @_history = history.useQueries(historyFactory)()
     @_history.replaceState({}, defaultRoute) if defaultRoute != '/'
-    @_avoidTransitionWhenSameRoute()
+    @_avoidTransitionSameRoute() if avoidTransitionSameRoute
 
   _handleRoute: (route) ->
     unless route
@@ -96,7 +101,7 @@ class Router
     @_location.state = location.state
     @_location.search = location.search
 
-  _avoidTransitionWhenSameRoute: ->
+  _avoidTransitionSameRoute: ->
     @_history.registerTransitionHook (location) =>
       isSameLocation = _.isEqual(location.pathname, @_location.pathname) and
         _.isEqual(location.search, @_location.search) and

@@ -22,7 +22,7 @@ Test = React.createClass
 Test2 = React.createClass
   render: ->
     div null,
-      '2. Hello'
+      '2. Hello' + Math.random()
 
 Test3 = React.createClass
   render: ->
