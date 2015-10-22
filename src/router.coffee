@@ -45,6 +45,7 @@ class Router
       matchTarget = @_matchTarget(route)
       invariant matchTarget,
         'No route matched: You probably missed to specify a React component.'
+      @_location.params = route.params
       component = matchTarget.component
       componentProps =
         route: _.assign(matchTarget.route, @_location)

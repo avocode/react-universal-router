@@ -1,5 +1,5 @@
 React = require 'react'
-Router = require '../lib/'
+Router = require '../src/'
 
 {div} = React.DOM
 

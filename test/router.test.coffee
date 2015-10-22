@@ -5,7 +5,7 @@ describe 'Router class: ', ->
   Router = null
 
   before ->
-    Router = require '../lib'
+    Router = require '../src'
 
   it 'should create Route instance', ->
     router = new Router()
@@ -284,3 +284,11 @@ describe 'Router class: ', ->
 
     router.listen ->
       expect(router.getCurrentComponent()).to.be(null)
+
+  it 'should have location.params', ->
+    router = new Router(history: 'memory', defaultRoute: '/projects/42')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+
+    router.listen ->
+      expect(router.getRouterProps().location.params.id).to.be('42')

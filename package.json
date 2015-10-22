@@ -2,13 +2,12 @@
   "name": "react-universal-router",
   "version": "0.3.0",
   "description": "Universal router for React",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "start": "webpack-dev-server --hot --progress --colors --port 3000",
     "test": "./node_modules/.bin/istanbul cover test/config/index.js -x 'test/**'",
-    "prepublish": "./node_modules/.bin/coffee -o ./ lib/",
-    "postpublish": "git clean -f -d",
-    "postinstall": "git clean -f -d"
+    "fast-test": "node test/config/index.js",
+    "prepublish": "./node_modules/.bin/coffee -o dist/ src/"
   },
   "author": "Petr Brzek",
   "license": "MIT",
