@@ -1,4 +1,5 @@
 require './coffee-coverage-loader'
+require './global'
 Mocha = require 'mocha'
 fs = require 'fs'
 _ = require 'lodash'

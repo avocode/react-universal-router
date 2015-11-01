@@ -4,7 +4,7 @@ global._ = require 'lodash'
 global.sinon = require 'sinon'
 
 global.document = jsdom.jsdom('<html><body></body></html>')
-global.window = document.parentWindow
+global.window = document.defaultView
 global.Image = window.Image
 global.navigator = window.navigator
 

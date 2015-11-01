@@ -16,13 +16,14 @@ class Router
     @_delimiter = obj.delimiter or '/'
     @_router = new Ruta3()
     @_slash = obj.slash or null
+
     avoidTransitionSameRoute = true
     if obj.avoidTransitionSameRoute is false
       avoidTransitionSameRoute = false
 
-    @_setupHistory obj.history or 'hash',
+    @_setupHistory(obj.history or 'hash',
       obj.defaultRoute or '/',
-      avoidTransitionSameRoute
+      avoidTransitionSameRoute)
 
   _setupHistory: (historyType, defaultRoute, avoidTransitionSameRoute) ->
     switch historyType
@@ -32,7 +33,7 @@ class Router
       else invariant(false, "There is no history type '#{history}'.")
 
     @_history = history.useQueries(historyFactory)()
-    @_history.replaceState({}, defaultRoute) if defaultRoute != '/'
+    @_history.replaceState(null, defaultRoute) if defaultRoute != '/'
     @_avoidTransitionSameRoute() if avoidTransitionSameRoute
 
   _handleRoute: (route) ->
@@ -60,6 +61,7 @@ class Router
         'Routes config: redirectTo key is misspelled or missing.'
       path = pathToRegexp.compile(redirectTo)
       @_history.replaceState(null, path(route.params))
+
       return null
 
   _matchTarget: (route) ->
@@ -140,6 +142,10 @@ class Router
     invariant(callback, 'unregisterTransitionHook: callback must be specified.')
     @_history.unregisterTransitionHook(callback) if _.isFunction(callback)
 
+  setRoute: (url) ->
+    # TODO: return status codes 200, 302, 404, 500
+    @_history.replaceState(null, url)
+
   getCurrentComponent: ->
     return @_activeComponent
 
@@ -171,7 +177,7 @@ class Router
         query: {}
         methodType: 'pushState'
 
-      obj = _.assign {}, defaults, options
+      obj = _.assign({}, defaults, options)
       {params, state, query, methodType} = obj
       route = @getRouteByName(name)
       invariant(route, 'transitionTo: wrong name argument provided.')

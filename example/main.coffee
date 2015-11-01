@@ -23,11 +23,19 @@ Test2 = React.createClass
   render: ->
     div null,
       '2. Hello' + Math.random()
+      @props.children
 
 Test3 = React.createClass
   render: ->
+    console.log @props
     div null,
       '3. Aloha'
+
+NiceComponent = React.createClass
+  render: ->
+    div null,
+      'Nice component :)'
+      @props.children
 
 App = React.createClass
   getInitialState: ->
@@ -54,14 +62,22 @@ routes =
 
 routes2 =
   component: Test2
-  states: {
-    'index': {}
-  }
+  states:
+    'index':
+      ahoj: 12
+    'about':
+      children: React.createElement(NiceComponent)
+    'users':
+      children: React.createElement(NiceComponent)
+    'user':
+      children:
+        React.createElement(NiceComponent, null, React.createElement(Test3))
 
 routes3 = {
   component: Test3
   states: {
-    'notFoundComponent': {}
+    'notFoundComponent':
+      notFound: true
   }
 }
 
@@ -72,6 +88,9 @@ routeMap =
     redirectTo: '/projects/:id'
   404: 'notFoundComponent'
   '/': 'index'
+  '/about': 'about'
+  '/users': 'users'
+  '/user/:id': 'user'
 
 
 router = new Router(history: 'hash')
