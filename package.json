@@ -16,8 +16,10 @@
     "invariant": "^2.1.0",
     "lodash": "^3.10.1",
     "path-to-regexp": "^1.2.1",
-    "react": "^0.13.3",
     "ruta3": "^2.0.0"
+  },
+  "peerDependencies": {
+    "react": "^0.13.3"
   },
   "devDependencies": {
     "coffee-coverage": "^0.6.3",
