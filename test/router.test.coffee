@@ -292,3 +292,12 @@ describe 'Router class: ', ->
 
     router.listen ->
       expect(router.getRouterProps().location.params.id).to.be('42')
+
+  it 'should reset the memory history', ->
+    router = new Router(history: 'memory', defaultRoute: '/projects/42')
+    router.addRoutes(routes)
+    router.addTarget(targetA, 'project-manager')
+    router.getRouterProps().transitionTo('index')
+    router.resetMemoryHistory()
+
+    expect(router.getRouterProps().goBack).to.throwError()

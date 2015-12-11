@@ -7,23 +7,27 @@ React = require 'react'
 
 class Router
 
-  constructor: (obj = {}) ->
+  constructor: (options = {}) ->
     @_activeComponent = null
     @_config = null
     @_targets = []
     @_location = {}
     @_routeProps = null
-    @_delimiter = obj.delimiter or '/'
     @_router = new Ruta3()
-    @_slash = obj.slash or null
 
-    avoidTransitionSameRoute = true
-    if obj.avoidTransitionSameRoute is false
-      avoidTransitionSameRoute = false
+    defaultOptions =
+      delimiter: '/'
+      avoidTransitionSameRoute: true
+      slash: null
+      history: 'hash'
+      defaultRoute: '/'
 
-    @_setupHistory(obj.history or 'hash',
-      obj.defaultRoute or '/',
-      avoidTransitionSameRoute)
+    @_options = _.assign({}, defaultOptions, options)
+    @_delimiter = @_options.delimiter
+    @_slash = @_options.slash
+
+    @_setupHistory(@_options.history, @_options.defaultRoute,
+      @_options.avoidTransitionSameRoute)
 
   _setupHistory: (historyType, defaultRoute, avoidTransitionSameRoute) ->
     switch historyType
@@ -110,6 +114,10 @@ class Router
         _.isEqual(location.search, @_location.search) and
         _.isEqual(location.state, @_location.state)
       return false if isSameLocation
+
+  resetMemoryHistory: ->
+    @_setupHistory(@_options.history, @_options.defaultRoute,
+      @_options.avoidTransitionSameRoute)
 
   addRoutes: (config) ->
     invariant(config, 'addRoutes: config must be provided.')
