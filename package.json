@@ -19,7 +19,7 @@
     "ruta3": "^2.0.0"
   },
   "peerDependencies": {
-    "react": "^0.13.3"
+    "react": "0.13.x || 0.14.x"
   },
   "devDependencies": {
     "coffee-coverage": "^0.6.3",
