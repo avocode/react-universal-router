@@ -300,4 +300,4 @@ describe 'Router class: ', ->
     router.getRouterProps().transitionTo('index')
     router.resetMemoryHistory()
 
-    expect(router.getRouterProps().goBack).to.throwError()
+    expect(router.getRouterProps().goBack).to.not.throwError()
