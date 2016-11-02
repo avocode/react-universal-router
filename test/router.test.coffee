@@ -1,3 +1,6 @@
+Url = require 'url'
+{ createMemoryHistory } = require 'history'
+
 routes = require './fixtures/routes'
 {targetA, targetB} = require './fixtures/target'
 
@@ -301,3 +304,40 @@ describe 'Router class: ', ->
     router.resetMemoryHistory()
 
     expect(router.getRouterProps().goBack).to.not.throwError()
+
+
+  describe 'history object injection', ->
+    it 'should use the provided history object', ->
+      history = createMemoryHistory()
+      history.listen = sinon.spy(history.listen)
+
+      router = new Router({ history })
+      router.addRoutes({})
+      router.addTarget(targetA, 'test-target')
+
+      router.listen(->)
+      expect(history.listen.callCount).to.be(1)
+
+    it 'should not modify the provided history object on init', ->
+      history = createMemoryHistory()
+      history.push = sinon.spy(history.push)
+      history.pushState = sinon.spy(history.pushState)
+      history.replace = sinon.spy(history.replace)
+      history.replaceState = sinon.spy(history.replaceState)
+
+      router = new Router({ history })
+      router.addRoutes({})
+      router.addTarget(targetA, 'test-target')
+
+      router.listen(->)
+
+      expect(history.push.callCount).to.be(0)
+      expect(history.pushState.callCount).to.be(0)
+      expect(history.replace.callCount).to.be(0)
+      expect(history.replaceState.callCount).to.be(0)
+
+    it 'should not allow a default route when using a custom history object', ->
+      history = createMemoryHistory()
+      expect(->
+        router = new Router({ history, defaultRoute: '/project/123' })
+      ).to.throwError(/default route/i)

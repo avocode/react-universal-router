@@ -76,6 +76,7 @@ Constructor optional options with default values:
     - 'memory' - is used as a reference implementation and may also be used i non-DOM environments, like React Native or Electron
     - 'hash' - is for use in legacy web browsers
     - 'push' - is for use in modern web browsers that support the HTML5 history API
+    - object - a custom history object instance can be passed in. The instance must implement the API specified by the [history](https://www.npmjs.com/package/history) package. A default route must not be specified (see below).
  - defaultRoute:
     - null - the initial history state is untouched
     - '/my-route' - will be default

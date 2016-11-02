@@ -29,14 +29,20 @@ class Router
       @_options.avoidTransitionSameRoute)
 
   _setupHistory: (historyType, defaultRoute, avoidTransitionSameRoute) ->
-    switch historyType
-      when 'hash' then historyFactory = history.createHashHistory
-      when 'push' then historyFactory = history.createHistory
-      when 'memory' then historyFactory = history.createMemoryHistory
-      else invariant(false, "There is no history type '#{history}'.")
+    if typeof historyType == 'object'
+      @_history = historyType
+      invariant !defaultRoute,
+        'Default route cannot be provided together with a history object'
+    else
+      switch historyType
+        when 'hash' then historyFactory = history.createHashHistory
+        when 'push' then historyFactory = history.createHistory
+        when 'memory' then historyFactory = history.createMemoryHistory
+        else invariant(false, "There is no history type '#{history}'.")
 
-    @_history = history.useQueries(historyFactory)()
-    @_history.replaceState(null, defaultRoute) if defaultRoute
+      @_history = history.useQueries(historyFactory)()
+      @_history.replaceState(null, defaultRoute) if defaultRoute
+
     @_avoidTransitionSameRoute() if avoidTransitionSameRoute
 
   _handleRoute: (route) ->
