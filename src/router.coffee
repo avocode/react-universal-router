@@ -109,11 +109,13 @@ class Router
     @_location.search = location.search
 
   _avoidTransitionSameRoute: ->
-    @_history.registerTransitionHook (location) =>
-      isSameLocation = _.isEqual(location.pathname, @_location.pathname) and
-        _.isEqual(location.search, @_location.search) and
-        _.isEqual(location.state, @_location.state)
-      return false if isSameLocation
+    @_history.registerTransitionHook(@_handleSameRouteTransitionCheck)
+
+  _handleSameRouteTransitionCheck: (location) =>
+    isSameLocation = _.isEqual(location.pathname, @_location.pathname) and
+      _.isEqual(location.search, @_location.search) and
+      _.isEqual(location.state, @_location.state)
+    return false if isSameLocation
 
   resetMemoryHistory: ->
     @_setupHistory(@_options.history, @_options.defaultRoute,
@@ -136,7 +138,7 @@ class Router
     invariant(callback, 'listen: callback must be provided.')
     invariant(@_config, 'listen: call `addRoutes` method first.')
     invariant(@_targets.length, 'listen: call `addTarget` method first.')
-    @_history.listen (location) =>
+    @_historyListenerDisposer = @_history.listen (location) =>
       @_updateLocationObj(location)
       return if @_slashResolver(location)
       @_activeComponent = @_handleRoute(@_router.match(location.pathname))
@@ -149,6 +151,12 @@ class Router
   unregisterTransitionHook: (callback) ->
     invariant(callback, 'unregisterTransitionHook: callback must be specified.')
     @_history.unregisterTransitionHook(callback) if _.isFunction(callback)
+
+  dispose: ->
+    if @_options.avoidTransitionSameRoute
+      @_history.unregisterTransitionHook(@_handleSameRouteTransitionCheck)
+
+    @_historyListenerDisposer?.call()
 
   setRoute: (url) ->
     # TODO: return status codes 200, 302, 404, 500
