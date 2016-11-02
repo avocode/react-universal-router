@@ -20,7 +20,6 @@ class Router
       avoidTransitionSameRoute: true
       slash: null
       history: 'hash'
-      defaultRoute: '/'
 
     @_options = _.assign({}, defaultOptions, options)
     @_delimiter = @_options.delimiter
@@ -37,7 +36,7 @@ class Router
       else invariant(false, "There is no history type '#{history}'.")
 
     @_history = history.useQueries(historyFactory)()
-    @_history.replaceState(null, defaultRoute) if defaultRoute != '/'
+    @_history.replaceState(null, defaultRoute) if defaultRoute
     @_avoidTransitionSameRoute() if avoidTransitionSameRoute
 
   _handleRoute: (route) ->

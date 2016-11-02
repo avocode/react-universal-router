@@ -77,8 +77,8 @@ Constructor optional options with default values:
     - 'hash' - is for use in legacy web browsers
     - 'push' - is for use in modern web browsers that support the HTML5 history API
  - defaultRoute:
-    - '/' - initial route (default)
-    - '/my-route' - will be default instead of `/`
+    - null - the initial history state is untouched
+    - '/my-route' - will be default
 
 To start listening on route changes you need to add `listen` listener.
 You can use it in your root component like this:
