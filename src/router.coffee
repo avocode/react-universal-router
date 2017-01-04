@@ -20,7 +20,6 @@ class Router
       avoidTransitionSameRoute: true
       slash: null
       history: 'hash'
-      defaultRoute: '/'
 
     @_options = _.assign({}, defaultOptions, options)
     @_delimiter = @_options.delimiter
@@ -30,14 +29,20 @@ class Router
       @_options.avoidTransitionSameRoute)
 
   _setupHistory: (historyType, defaultRoute, avoidTransitionSameRoute) ->
-    switch historyType
-      when 'hash' then historyFactory = history.createHashHistory
-      when 'push' then historyFactory = history.createHistory
-      when 'memory' then historyFactory = history.createMemoryHistory
-      else invariant(false, "There is no history type '#{history}'.")
+    if typeof historyType == 'object'
+      @_history = historyType
+      invariant !defaultRoute,
+        'Default route cannot be provided together with a history object'
+    else
+      switch historyType
+        when 'hash' then historyFactory = history.createHashHistory
+        when 'push' then historyFactory = history.createHistory
+        when 'memory' then historyFactory = history.createMemoryHistory
+        else invariant(false, "There is no history type '#{history}'.")
 
-    @_history = history.useQueries(historyFactory)()
-    @_history.replaceState(null, defaultRoute) if defaultRoute != '/'
+      @_history = history.useQueries(historyFactory)()
+      @_history.replaceState(null, defaultRoute) if defaultRoute
+
     @_avoidTransitionSameRoute() if avoidTransitionSameRoute
 
   _handleRoute: (route) ->
@@ -109,11 +114,13 @@ class Router
     @_location.search = location.search
 
   _avoidTransitionSameRoute: ->
-    @_history.registerTransitionHook (location) =>
-      isSameLocation = _.isEqual(location.pathname, @_location.pathname) and
-        _.isEqual(location.search, @_location.search) and
-        _.isEqual(location.state, @_location.state)
-      return false if isSameLocation
+    @_history.registerTransitionHook(@_handleSameRouteTransitionCheck)
+
+  _handleSameRouteTransitionCheck: (location) =>
+    isSameLocation = _.isEqual(location.pathname, @_location.pathname) and
+      _.isEqual(location.search, @_location.search) and
+      _.isEqual(location.state, @_location.state)
+    return false if isSameLocation
 
   resetMemoryHistory: ->
     @_setupHistory(@_options.history, @_options.defaultRoute,
@@ -136,7 +143,7 @@ class Router
     invariant(callback, 'listen: callback must be provided.')
     invariant(@_config, 'listen: call `addRoutes` method first.')
     invariant(@_targets.length, 'listen: call `addTarget` method first.')
-    @_history.listen (location) =>
+    @_historyListenerDisposer = @_history.listen (location) =>
       @_updateLocationObj(location)
       return if @_slashResolver(location)
       @_activeComponent = @_handleRoute(@_router.match(location.pathname))
@@ -149,6 +156,12 @@ class Router
   unregisterTransitionHook: (callback) ->
     invariant(callback, 'unregisterTransitionHook: callback must be specified.')
     @_history.unregisterTransitionHook(callback) if _.isFunction(callback)
+
+  dispose: ->
+    if @_options.avoidTransitionSameRoute
+      @_history.unregisterTransitionHook(@_handleSameRouteTransitionCheck)
+
+    @_historyListenerDisposer?.call()
 
   setRoute: (url) ->
     # TODO: return status codes 200, 302, 404, 500
