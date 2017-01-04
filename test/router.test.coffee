@@ -336,6 +336,19 @@ describe 'Router class: ', ->
       expect(history.replace.callCount).to.be(0)
       expect(history.replaceState.callCount).to.be(0)
 
+    it 'should match the initial location of the provided history object', (callback) ->
+      history = createMemoryHistory()
+      history.push('/projects')
+
+      router = new Router({ history })
+      router.addRoutes(routes)
+      router.addTarget(targetA, 'project-manager')
+      router.listen (component) ->
+        expect(router.getCurrentComponent()).to.be.an('object')
+        expect(component).to.be.an('object')
+        expect(_.isEqual(router.getCurrentComponent(), component)).to.be(true)
+        callback()
+
     it 'should not allow a default route when using a custom history object', ->
       history = createMemoryHistory()
       expect(->
