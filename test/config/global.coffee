@@ -9,4 +9,5 @@ global.Image = window.Image
 global.navigator = window.navigator
 
 global.React = require 'react'
-global.ReactTestUtils = require 'react/lib/ReactTestUtils'
+global.ReactTestUtils = require 'react-addons-test-utils'
+global.ReactDOMServer = require 'react-dom/server'
