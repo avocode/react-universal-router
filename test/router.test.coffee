@@ -229,7 +229,7 @@ describe 'Router class: ', ->
     result = '<div>componentB...</div>'
 
     router.listen (component) ->
-      expect(React.renderToStaticMarkup(component)).to.be(result)
+      expect(ReactDOMServer.renderToStaticMarkup(component)).to.be(result)
 
     result = '<div>componentA...</div>'
     router.getRouterProps().transitionTo('project-manager/list')
