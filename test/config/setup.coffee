@@ -9,7 +9,7 @@ mocha = new Mocha()
 testPath = path.join(__dirname, '..')
 
 fs.readdirSync(testPath).filter (file) ->
-  _.include(file, '.coffee')
+  _.includes(file, '.coffee')
 .forEach (file) ->
   mocha.addFile path.join(testPath, file)
 
