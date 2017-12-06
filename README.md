@@ -16,7 +16,7 @@ So eventually we've built React Universal Router, an abstraction above the Histo
 
 Key/Value definition of routes.
 
-```
+```js
 module.exports = {
   '/': 'homepage',
   '/designs': 'designs',
@@ -30,7 +30,7 @@ module.exports = {
 
 Targets are the "glue" between the routes and your components.
 
-```
+```js
 module.exports = {
   component: MyAppComponent,
   states: {
@@ -56,7 +56,7 @@ States are matching the names (values) defined in route definition(s). You can o
 
 You need to create a new instance of Router, add route definition(s) and target definition(s).
 
-```
+```js
 const options = {}
 const router = new Router(options)
 router.addRoutes(routes)
@@ -84,7 +84,7 @@ Constructor optional options with default values:
 To start listening on route changes you need to add `listen` listener.
 You can use it in your root component like this:
 
-```
+```js
 const App = React.createClass({
   getInitialState() {
     return { activeComponent: router.getCurrentComponent() };
@@ -105,7 +105,7 @@ const App = React.createClass({
 
 Or in a similar fashion as the React router:
 
-```
+```js
 router.listen(component => React.render(component, mountElement));
 ```
 
@@ -113,7 +113,7 @@ router.listen(component => React.render(component, mountElement));
 
 You can change the route by calling the `transitionTo` method and a name of the route defined in route definition(s).
 
-```
+```js
 // Simple transition to a different page
 const { transitionTo } = router.getRouterProps();
 transitionTo('designs');
